@@ -299,7 +299,11 @@ call s:add_methods('repo',['dir','configured_tree','tree','bare','translate','he
 
 function! s:repo_git_command(...) dict abort
   let git = g:fugitive_git_executable . ' --git-dir='.s:shellesc(self.git_dir)
-  return git.join(map(copy(a:000),'" ".s:shellesc(v:val)'),'')
+  if &shell =~# 'cmd' && index(a:000, 'log') > -1
+    return git.join(map(copy(a:000),'v:val=~"%" ? " "."\"".v:val."\"" : " ".s:shellesc(v:val)'),'')
+  else
+    return git.join(map(copy(a:000),'" ".s:shellesc(v:val)'),'')
+  endif
 endfunction
 
 function! s:repo_git_chomp(...) dict abort
